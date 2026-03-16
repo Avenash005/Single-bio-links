@@ -1,0 +1,452 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ave-dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --neon: #00c8ff;
+    --neon2: #0080ff;
+    --neon-dim: rgba(0, 200, 255, 0.18);
+    --neon-glow: 0 0 8px #00c8ff, 0 0 24px rgba(0,200,255,0.4);
+    --glass: rgba(0, 200, 255, 0.05);
+    --glass-border: rgba(0, 200, 255, 0.25);
+  }
+
+  html, body {
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Canvas particles ── */
+  #particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── Page layout ── */
+  .page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.25rem;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 2.5rem 2rem 2rem;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 0 40px rgba(0,200,255,0.08), inset 0 0 40px rgba(0,200,255,0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    animation: fadeUp 0.9s cubic-bezier(.22,.9,.34,1) both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Avatar ── */
+  .avatar-wrap {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 1.4rem;
+  }
+
+  .avatar-ring {
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #00c8ff, #0040ff, #00c8ff);
+    animation: spin 4s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .avatar-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #030b14;
+    border: 3px solid #000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--neon);
+    letter-spacing: 2px;
+  }
+
+  .avatar-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Name & bio ── */
+  .name {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.25rem, 5vw, 1.65rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #fff;
+    text-align: center;
+    line-height: 1.1;
+    text-shadow: var(--neon-glow);
+    margin-bottom: 0.55rem;
+  }
+
+  .handle {
+    font-size: 0.85rem;
+    color: var(--neon);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
+  }
+
+  .bio {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    max-width: 320px;
+    margin-bottom: 1.8rem;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon), transparent);
+    margin: 0 auto 1.8rem;
+    border-radius: 2px;
+  }
+
+  /* ── Links grid ── */
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .link-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.18);
+    border-radius: 12px;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .link-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 40%, rgba(0,200,255,0.08) 100%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .link-btn:hover {
+    background: rgba(0,200,255,0.1);
+    border-color: rgba(0,200,255,0.55);
+    transform: translateX(4px);
+    box-shadow: 0 0 16px rgba(0,200,255,0.15);
+  }
+
+  .link-btn:hover::before { opacity: 1; }
+  .link-btn:active { transform: translateX(4px) scale(0.98); }
+
+  .link-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(0,200,255,0.12);
+    border: 1px solid rgba(0,200,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--neon);
+  }
+
+  .link-icon svg { width: 17px; height: 17px; fill: currentColor; }
+
+  .link-label { flex: 1; }
+  .link-label span { display: block; font-size: 0.72rem; color: rgba(255,255,255,0.38); font-weight: 400; letter-spacing: 0.3px; margin-top: 1px; }
+
+  .link-arrow {
+    color: rgba(0,200,255,0.4);
+    font-size: 1rem;
+    transition: color 0.2s;
+  }
+  .link-btn:hover .link-arrow { color: var(--neon); }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 2rem;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.18);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    animation: fadeUp 1.2s 0.4s both;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<div class="page">
+  <div class="card">
+
+    <!-- Avatar -->
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <div class="avatar-inner"> <img src="profile-pic.jpeg" alt="Avatar"></div>
+      
+    </div>
+
+    <!-- Name -->
+    <h1 class="name">Avenash.V</h1>
+    <p class="handle">@Ave.dev</p>
+    <p class="bio">Full-Stack Developer &amp; Open Source Enthusiast. Building things that matter. Always learning.</p>
+    <div class="divider"></div>
+
+    <!-- Links -->
+    <nav class="links" aria-label="Social links">
+
+      <!-- GitHub -->
+      <a href="https://github.com/Avenash005" class="link-btn" target="_blank" rel="noopener">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        </div>
+        <div class="link-label">GitHub <span>View my repositories</span></div>
+        <span class="link-arrow">›</span>
+      </a>
+
+      <!-- LeetCode -->
+      <a href="https://leetcode.com/u/Avenash_V/" class="link-btn" target="_blank" rel="noopener">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0zm-2.866 12.815a1.38 1.38 0 0 0-1.38 1.382 1.38 1.38 0 0 0 1.38 1.382H20.79a1.38 1.38 0 0 0 1.38-1.382 1.38 1.38 0 0 0-1.38-1.382z"/></svg>
+        </div>
+        <div class="link-label">LeetCode <span>DSA solutions &amp; stats</span></div>
+        <span class="link-arrow">›</span>
+      </a>
+
+      <!-- YouTube -->
+      <a href="https://youtube.com/@yourusername" class="link-btn" target="_blank" rel="noopener">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </div>
+        <div class="link-label">YouTube <span>Videos &amp; tutorials</span></div>
+        <span class="link-arrow">›</span>
+      </a>
+
+      <!-- LinkedIn -->
+      <a href="www.linkedin.com/in/avenash-v-main" class="link-btn" target="_blank" rel="noopener">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </div>
+        <div class="link-label">LinkedIn <span>Professional profile</span></div>
+        <span class="link-arrow">›</span>
+      </a>
+
+      <!-- X / Twitter -->
+      <a href="https://x.com/yourusername" class="link-btn" target="_blank" rel="noopener">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </div>
+        <div class="link-label">X (Twitter) <span>Thoughts &amp; updates</span></div>
+        <span class="link-arrow">›</span>
+      </a>
+
+      <!-- Email -->
+      <a href="mailto:avensh.dev@gmail.com" class="link-btn">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+        </div>
+        <div class="link-label">Email <span>avensh.dev@gmail.com</span></div>
+        <span class="link-arrow">›</span>
+      </a>
+
+    </nav>
+  </div>
+
+  <p class="footer">© 2026 Avenash.V</p>
+</div>
+
+<script>
+/* ── Neon blue particle system ── */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], mouse = { x: null, y: null };
+
+const NEON = '0, 200, 255';
+const NEON2 = '0, 128, 255';
+const COUNT = Math.min(Math.floor(window.innerWidth / 5), 180);
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', () => { resize(); init(); });
+
+window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+window.addEventListener('touchmove', e => {
+  mouse.x = e.touches[0].clientX;
+  mouse.y = e.touches[0].clientY;
+}, { passive: true });
+window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+
+function Particle() {
+  this.reset = function() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.r = Math.random() * 1.8 + 0.4;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = (Math.random() - 0.5) * 0.5;
+    this.alpha = Math.random() * 0.6 + 0.2;
+    this.pulse = Math.random() * Math.PI * 2;
+    this.pulseSpeed = Math.random() * 0.02 + 0.005;
+  };
+  this.reset();
+}
+
+function init() {
+  particles = [];
+  for (let i = 0; i < COUNT; i++) particles.push(new Particle());
+}
+init();
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  /* subtle grid lines */
+  ctx.strokeStyle = 'rgba(0,200,255,0.03)';
+  ctx.lineWidth = 0.5;
+  const step = 80;
+  for (let x = 0; x < W; x += step) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += step) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  /* connect nearby particles */
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const p1 = particles[i], p2 = particles[j];
+      const dx = p1.x - p2.x, dy = p1.y - p2.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        const a = (1 - dist / 120) * 0.25;
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${NEON},${a})`;
+        ctx.lineWidth = 0.5;
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  /* mouse repel & connect */
+  if (mouse.x !== null) {
+    for (let p of particles) {
+      const dx = p.x - mouse.x, dy = p.y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 140) {
+        const a = (1 - dist / 140) * 0.5;
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${NEON},${a})`;
+        ctx.lineWidth = 0.8;
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(mouse.x, mouse.y);
+        ctx.stroke();
+        const force = (140 - dist) / 140 * 0.8;
+        p.x += (dx / dist) * force;
+        p.y += (dy / dist) * force;
+      }
+    }
+  }
+
+  /* draw particles */
+  for (let p of particles) {
+    p.pulse += p.pulseSpeed;
+    const pAlpha = p.alpha + Math.sin(p.pulse) * 0.15;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${NEON},${pAlpha})`;
+    ctx.fill();
+
+    /* glow halo */
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
+    grad.addColorStop(0, `rgba(${NEON},${pAlpha * 0.4})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * 5, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0 || p.x > W) p.vx *= -1;
+    if (p.y < 0 || p.y > H) p.vy *= -1;
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
